@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Пиона — салон красоты в Сладково</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Arial,sans-serif; }
+  body { background:#fdf6f9; color:#4a2c3a; }
+  header { background:linear-gradient(135deg,#f7c5d5,#e887a8); padding:30px 16px; text-align:center; }
+  header h1 { color:#8a2d52; font-size:34px; margin-bottom:6px; }
+  header p { color:#8a2d52; font-size:16px; }
+  nav { background:#c94f7c; padding:10px; text-align:center; }
+  nav a { color:#fff; text-decoration:none; margin:0 14px; font-weight:600; }
+  section { max-width:900px; margin:0 auto; padding:34px 16px; }
+  h2 { color:#c94f7c; margin-bottom:16px; font-size:26px; }
+  .services { display:flex; flex-wrap:wrap; gap:14px; }
+  .card { background:#fff; border-radius:14px; padding:18px; flex:1 1 200px; box-shadow:0 2px 10px rgba(201,79,124,.12); }
+  .card h3 { color:#c94f7c; margin-bottom:8px; font-size:18px; }
+  .card p { font-size:14px; line-height:1.5; }
+  .steps { display:flex; flex-wrap:wrap; gap:14px; }
+  .step { background:#fff; border-radius:14px; padding:18px; flex:1 1 180px; box-shadow:0 2px 10px rgba(201,79,124,.12); }
+  .step b { color:#c94f7c; display:block; margin-bottom:6px; }
+  /* ===== Расписание ===== */
+  .daystrip { display:flex; gap:8px; overflow-x:auto; padding:4px 0 10px; }
+  .daychip { min-width:96px; text-align:center; padding:10px 8px; border-radius:12px; border:2px solid #e3b6c6; background:#fff; cursor:pointer; user-select:none; }
+  .daychip .d { font-weight:700; font-size:16px; }
+  .daychip .m { font-size:12px; color:#a3707f; }
+  .daychip .cnt { font-size:12px; margin-top:4px; color:#2e7d32; }
+  .daychip.selected { border-color:#c94f7c; background:#fce7ef; }
+  .daychip.holiday { border-color:#d33; background:#fdecec; }
+  .daychip.holiday .cnt { color:#d33; font-weight:700; }
+  .daychip.nopast { opacity:.45; cursor:default; }
+  .slots { display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; }
+  .slot { padding:10px 16px; border-radius:10px; border:2px solid #7bc47f; color:#2e7d32; background:#f2fbf3; cursor:pointer; font-weight:600; }
+  .slot.selected { background:#7bc47f; color:#fff; }
+  .slot.busy { border-color:#cfcfcf; color:#999; background:#f4f4f4; cursor:not-allowed; text-decoration:line-through; }
+  .holiday-note { margin-top:10px; background:#fdecec; color:#d33; border:1px solid #f0bcbc; border-radius:10px; padding:10px 14px; display:none; }
+  /* ===== Форма ===== */
+  form { background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 10px rgba(201,79,124,.12); max-width:560px; }
+  label { display:block; margin:12px 0 4px; font-size:14px; font-weight:600; }
+  input, select, textarea { width:100%; padding:10px 12px; border:1px solid #e3b6c6; border-radius:8px; font-size:16px; font-family:inherit; }
+  .trow { display:flex; gap:10px; }
+  .trow > div { flex:1; }
+  .bwrap { margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+  .bwrap button { padding:14px; border:none; border-radius:10px; color:#fff; font-size:16px; font-weight:600; cursor:pointer; }
+  .btn-tg { background:#2aabee; }
+  .btn-max { background:#8b5cf6; }
+  .btn-tel { background:#c94f7c; }
+  .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#c94f7c; color:#fff; padding:12px 20px; border-radius:10px; display:none; z-index:99; box-shadow:0 4px 12px rgba(0,0,0,.2); }
+  footer { background:#8a2d52; color:#fff; text-align:center; padding:24px 16px; margin-top:30px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Пиона</h1>
+  <p>Салон красоты в селе Сладково · ногти · брови · ресницы · депиляция</p>
+</header>
+
+<nav>
+  <a href="#services">Услуги</a>
+  <a href="#steps">Как записаться</a>
+  <a href="#schedule">Расписание</a>
+  <a href="#contacts">Контакты</a>
+</nav>
+
+<section id="services">
+  <h2>Услуги и цены</h2>
+  <div class="services">
+    <div class="card"><h3>Маникюр</h3><p>Классический и аппаратный маникюр, покрытие гель-лаком. Дизайн ногтей. Цена от 1 000 ₽.</p></div>
+    <div class="card"><h3>Педикюр</h3><p>Обработка стоп и ногтей, покрытие гель-лаком. Цена от 1 200 ₽.</p></div>
+    <div class="card"><h3>Брови</h3><p>Коррекция, окрашивание краской и хной, ламинирование. Цена от 500 ₽.</p></div>
+    <div class="card"><h3>Ресницы</h3><p>Классическое наращивание, ламинирование, ботокс. Цена от 1 000 ₽.</p></div>
+    <div class="card"><h3>Депиляция</h3><p>Восковая и сахарная депиляция различных зон. Цена от 300 ₽.</p></div>
+  </div>
+</section>
+
+<section id="steps">
+  <h2>Четыре шага до красоты</h2>
+  <div class="steps">
+    <div class="step"><b>1. Выберите услугу</b>Посмотрите цены и решите, что вам нужно.</div>
+    <div class="step"><b>2. Подберите время</b>В блоке «Расписание» видно свободные окошки.</div>
+    <div class="step"><b>3. Заполните форму</b>Имя, телефон и пожелания — это займёт минуту.</div>
+    <div class="step"><b>4. Подтвердите</b>Отправьте заявку в мессенджер — я отвечу и подтвержда.</div>
+  </div>
+</section>
+
+<section id="schedule">
+  <h2>Расписание</h2>
+  <p style="font-size:14px;color:#a3707f;margin-bottom:10px">Выберите день — и увидите все окошки: свободные можно забронировать, занятые и выходные подсвечены.</p>
+  <div class="daystrip" id="daystrip"></div>
+  <div class="slots" id="slots"></div>
+  <div class="holiday-note" id="holidayNote">Этот день закрыт — мастер отдыхает 🌸</div>
+</section>
+
+<section id="booking">
+  <h2>Записаться</h2>
+  <form id="form" onsubmit="return false;">
+    <label>Имя</label>
+    <input type="text" id="name" placeholder="Как к вам обращаться">
+    <label>Телефон</label>
+    <input type="tel" id="phone" placeholder="+7 ___ ___-__-__">
+    <label>Услуга</label>
+    <select id="service">
+      <option>Маникюр</option><option>Педикюр</option><option>Брови</option><option>Ресницы</option><option>Депиляция</option><option>Другое</option>
+    </select>
+    <div class="trow">
+      <div><label>Дата визита</label><input type="date" id="visitDate"></div>
+      <div><label>Время</label>
+        <select id="visitTime"></select>
+      </div>
+    </div>
+    <label>Пожелания</label>
+    <textarea id="wishes" rows="2" placeholder="Например: длинные ногти, форма миндаль"></textarea>
+    <div class="bwrap">
+      <button class="btn-tg" onclick="submitVia('tg')">🟦 Записаться в Telegram</button>
+      <button class="btn-max" onclick="submitVia('max')">🟣 Записаться в MAX</button>
+      <button class="btn-tel" onclick="submitVia('tel')">📞 Записаться по телефону</button>
+    </div>
+  </form>
+</section>
+
+<section id="contacts">
+  <h2>Контакты</h2>
+  <p>📍 Село Сладково, Тюменская область</p>
+  <p>📞 <a href="tel:+79000000000">+7 900 000-00-00</a></p>
+  <p>🟦 Telegram: <a href="https://t.me/Piona_Sladkovo">@Piona_Sladkovo</a></p>
+  <p>🟣 MAX: <a href="https://max.ru/u/piona_sladkovo">мой профиль в MAX</a></p>
+</section>
+
+<footer>© Пиона — салон красоты в Сладково. Ждём вас!</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== НАСТРОЙКИ =====
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIY1nhqV-kMxfnCESgLbKNpp89A2ZJyIYTU-3_WMTbnJCTFuFpfRxuQ3Uw1GqkBF2Z/exec';
+const TIME_SLOTS = ['10:00','12:00','14:00','16:00','18:00','19:30'];
+const MAX_URL = 'https://max.ru/u/piona_sladkovo';
+
+// ===== СОСТОЯНИЕ =====
+let busyMap = {};   // {'дд.мм.гггг': ['10:00', ...]}
+let closedList = []; // ['дд.мм.гггг', ...]
+let days = [];      // [{date: Date, key: 'дд.мм.гггг'}]
+let selectedDay = null;
+let selectedTime = null;
+let formLock = false;
+
+// ===== Дата БЕЗ UTC-сдвига: собираем вручную из локальных чисел =====
+function dateKey(d) {
+  return ('0' + d.getDate()).slice(-2) + '.' +
+         ('0' + (d.getMonth() + 1)).slice(-2) + '.' +
+         d.getFullYear();
+}
+
+function startOfDay(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
+
+function showToast(text) {
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+// ===== Загрузка занятости и выходных =====
+async function loadBusy() {
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=busy');
+    const json = await res.json();
+    if (json.ok) { busyMap = json.busy || {}; closedList = json.closed || []; }
+  } catch (err) { /* расписание покажется свободным до связи */ }
+}
+
+// ===== Построение полоски дней (сегодня + 14) =====
+function buildDays() {
+  const strip = document.getElementById('daystrip');
+  strip.innerHTML = '';
+  days = [];
+  const today = startOfDay(new Date());
+  const months = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const key = dateKey(d);
+    days.push({ date: d, key: key });
+    const isClosed = closedList.indexOf(key) !== -1;
+    const busyTimes = busyMap[key] || [];
+    const freeCount = TIME_SLOTS.filter(t => busyTimes.indexOf(t) === -1).length;
+
+    const chip = document.createElement('div');
+    chip.className = 'daychip' + (i === 0 ? ' selected' : '') + (isClosed ? ' holiday' : '');
+    chip.innerHTML = '<div class="d">' + d.getDate() + ' ' + months[d.getMonth()] + '</div>' +
+                     '<div class="m">' + key.slice(6) + '</div>' +
+                     '<div class="cnt">' + (isClosed ? 'выходной' : (freeCount === 0 ? 'занято' : 'свободно: ' + freeCount)) + '</div>';
+    chip.onclick = () => { selectedDay = d; document.querySelectorAll('.daychip').forEach(c => c.classList.remove('selected')); chip.classList.add('selected'); renderSlots(); };
+    strip.appendChild(chip);
+  }
+  if (!selectedDay) selectedDay = days[0].date;
+}
+
+// ===== Окошки выбранного дня =====
+function renderSlots() {
+  const wrap = document.getElementById('slots');
+  const note = document.getElementById('holidayNote');
+  wrap.innerHTML = '';
+  const key = dateKey(selectedDay);
+  const isClosed = closedList.indexOf(key) !== -1;
+  const busyTimes = busyMap[key] || [];
+
+  if (isClosed) { note.style.display = 'block'; } else { note.style.display = 'none'; }
+
+  TIME_SLOTS.forEach(t => {
+    const el = document.createElement('div');
+    const isBusy = busyTimes.indexOf(t) !== -1;
+    el.className = 'slot' + (isBusy || isClosed ? ' busy' : '');
+    el.textContent = t;
+    if (!isBusy && !isClosed) {
+      el.onclick = () => {
+        selectedTime = t;
+        document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('visitDate').value = isoFromKey(key);
+        document.getElementById('visitTime').value = t;
+        document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+      };
+    }
+    wrap.appendChild(el);
+  });
+}
+
+// ===== 'дд.мм.гггг' -> 'гггг-мм-дд' для input[type=date] =====
+function isoFromKey(key) {
+  const p = key.split('.');
+  return p[2] + '-' + p[1] + '-' + p[0];
+}
+
+// ===== Заполнение select времени с учётом занятости =====
+function fillTimeSelect() {
+  const sel = document.getElementById('visitTime');
+  const dateVal = document.getElementById('visitDate').value;
+  sel.innerHTML = '<option value="">— выберите время —</option>';
+  if (!dateVal) return;
+  const p = dateVal.split('-');
+  const key = p[2] + '.' + p[1] + '.' + p[0];
+  const isClosed = closedList.indexOf(key) !== -1;
+  const busyTimes = busyMap[key] || [];
+  TIME_SLOTS.forEach(t => {
+    const o = document.createElement('option');
+    o.value = t;
+    o.textContent = t + (isClosed ? ' — выходной' : (busyTimes.indexOf(t) !== -1 ? ' — занято' : ''));
+    if (isClosed || busyTimes.indexOf(t) !== -1) o.disabled = true;
+    sel.appendChild(o);
+  });
+}
+
+// ===== Свежая проверка перед отправкой =====
+async function freshCheck(key, time) {
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=busy');
+    const json = await res.json();
+    if (!json.ok) return null;
+    const busy = json.busy || {};
+    const closed = json.closed || [];
+    if (closed.indexOf(key) !== -1) return 'Этот день закрыт — мастер отдыхает. Выберите другой день.';
+    if ((busy[key] || []).indexOf(time) !== -1) return 'Это время уже занято. Выберите другое — расписание обновлено.';
+    busyMap = busy; closedList = closed;
+    return null;
+  } catch (err) { return null; }
+}
+
+// ===== Отправка заявки =====
+async function submitVia(channel) {
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const service = document.getElementById('service').value;
+  const wishes = document.getElementById('wishes').value.trim();
+  const dateIso = document.getElementById('visitDate').value;
+  const time = document.getElementById('visitTime').value;
+  if (!name) { alert('Пожалуйста, укажите имя'); return; }
+  if (!phone) { alert('Пожалуйста, укажите телефон'); return; }
+  if (!dateIso) { alert('Пожалуйста, выберите дату'); return; }
+  if (!time) { alert('Пожалуйста, выберите время'); return; }
+  if (formLock) return;
+  formLock = true;
+
+  const p = dateIso.split('-');
+  const key = p[2] + '.' + p[1] + '.' + p[0];
+
+  const problem = await freshCheck(key, time);
+  if (problem) {
+    formLock = false;
+    fillTimeSelect();
+    buildDays(); renderSlots();
+    alert(problem);
+    return;
+  }
+
+  const text = 'Здравствуйте! Хочу записаться.\nИмя: ' + name + '\nТелефон: ' + phone +
+               '\nУслуга: ' + service + '\nДата: ' + key + '\nВремя: ' + time +
+               (wishes ? '\nПожелания: ' + wishes : '');
+
+  // Пишем в таблицу до открытия мессенджера
+  let saved = false;
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ name: name, phone: phone, service: service, visitDate: key, visitTime: time, wishes: wishes })
+    });
+    const json = await res.json();
+    saved = !!json.ok;
+  } catch (err) { saved = false; }
+
+  if (!saved) showToast('Не получилось записать в таблицу — но заявка всё равно отправится, мастер свяжется с вами.');
+
+  const tgLink = 'https://t.me/Piona_Sladkovo?text=' + encodeURIComponent(text);
+  if (channel === 'tg') { window.open(tgLink, '_blank'); }
+  else if (channel === 'max') { window.open(MAX_URL, '_blank'); showToast('Текст заявки скопирован — отправьте его мастеру'); }
+  else { window.location.href = 'tel:+79000000000'; showToast('Текст заявки скопирован — отправьте его мастеру'); }
+
+  // Обновляем расписание
+  setTimeout(() => { loadBusy().then(() => { buildDays(); renderSlots(); fillTimeSelect(); }); }, 1500);
+  formLock = false;
+}
+
+// ===== Инициализация =====
+document.getElementById('visitDate').addEventListener('change', fillTimeSelect);
+document.getElementById('visitDate').min = new Date().getFullYear() + '-' +
+  ('0' + (new Date().getMonth() + 1)).slice(-2) + '-' + ('0' + new Date().getDate()).slice(-2);
+
+loadBusy().then(() => {
+  buildDays();
+  renderSlots();
+  fillTimeSelect();
+});
+</script>
+</body>
+</html>
