@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Пиона — админка</title>
+<style>
+  body { font-family:Georgia,serif; background:#fff5f7; color:#5a3a4a; margin:0; padding:20px; }
+  h1 { color:#c2185b; text-align:center; }
+  h2 { color:#c2185b; margin-bottom:14px; }
+  .box { background:#fff; border-radius:16px; padding:20px; box-shadow:0 4px 14px rgba(232,120,156,.15); max-width:1000px; margin:20px auto; }
+  input { padding:10px; border:2px solid #f3c1d3; border-radius:10px; font-size:15px; font-family:inherit; }
+  button { padding:10px 18px; border:none; border-radius:12px; font-weight:bold; color:#fff; cursor:pointer; background:#e8789c; font-family:inherit; }
+  button:hover { opacity:.9; }
+  .del { background:#e57373; padding:6px 12px; font-size:13px; }
+  .gray { background:#bbb; }
+  .green { background:#4caf50; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th { background:#fce4ec; color:#c2185b; padding:8px; text-align:left; }
+  td { padding:8px; border-bottom:1px solid #f8d7e3; vertical-align:top; }
+  .msg { text-align:center; color:#2e7d32; font-weight:bold; min-height:20px; margin-top:10px; }
+  .err { color:#c62828; }
+  .hidden { display:none; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .chip { background:#ffd6d6; color:#a33; border-radius:20px; padding:6px 14px; font-weight:bold; }
+  .scroll { overflow-x:auto; margin-top:14px; }
+</style>
+</head>
+<body>
+<h1>Пиона — админка 🌸</h1>
+
+<div class="box" id="loginBox">
+  <h2>Вход</h2>
+  <input type="password" id="pw" placeholder="Пароль администратора" style="max-width:260px;">
+  <button onclick="login()">Войти</button>
+  <div class="msg" id="loginMsg"></div>
+</div>
+
+<div id="panel" class="hidden">
+  <div class="box">
+    <h2>Заявки</h2>
+    <button onclick="loadBookings()">Обновить</button>
+    <button class="gray" onclick="logout()">Выйти</button>
+    <div class="scroll">
+      <table>
+        <thead><tr>
+          <th>№</th><th>Дата подачи</th><th>Имя</th><th>Телефон</th>
+          <th>Услуга</th><th>Дата визита</th><th>Время</th><th>Пожелания</th><th></th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <div class="box">
+    <h2>Рабочие дни</h2>
+    <p>Выберите дату и закройте день — на сайте он станет «выходным».</p>
+    <input type="date" id="dayDate">
+    <button onclick="closeDay(true)">Закрыть день</button>
+    <button class="green" onclick="closeDay(false)">Открыть день</button>
+    <div class="chips" id="closedList"></div>
+    <div class="msg" id="dayMsg"></div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIY1nhqV-kMxfnCESgLbKNpp89A2ZJyIYTU-3_WMTbnJCTFuFpfRxuQ3Uw1GqkBF2Z/exec';
+let PW = '';
+
+function post(data) {
+  return fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json());
+}
+function fromInput(d) {
+  const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? m[3] + '.' + m[2] + '.' + m[1] : d;
+}
+function login() {
+  PW = document.getElementById('pw').value.trim();
+  if (!PW) { document.getElementById('loginMsg').textContent = 'Введите пароль'; return; }
+  loadBookings();
+  document.getElementById('loginBox').classList.add('hidden');
+  document.getElementById('panel').classList.remove('hidden');
+}
+function logout() {
+  PW = '';
+  document.getElementById('panel').classList.add('hidden');
+  document.getElementById('loginBox').classList.remove('hidden');
+  document.getElementById('pw').value = '';
+}
+function loadBookings() {
+  post({ action: 'get', password: PW }).then(j => {
+    if (!j.ok) { document.getElementById('loginMsg').textContent = j.error || 'Ошибка входа'; return; }
+    const tb = document.getElementById('rows');
+    tb.innerHTML = '';
+    if (!j.items.length) {
+      tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#8a5a70">Пока заявок нет</td></tr>';
+    }
+    j.items.forEach(it => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + it.id + '</td><td>' + it.ts + '</td><td>' + esc(it.name) + '</td><td>' +
+        esc(it.phone) + '</td><td>' + esc(it.service) + '</td><td><b>' + esc(it.date) + '</b></td><td><b>' +
+        esc(it.time) + '</b></td><td>' + esc(it.note) + '</td>' +
+        '<td><button class="del" onclick="del(' + it.id + ')">Удалить</button></td>';
+      tb.appendChild(tr);
+    });
+    renderClosed(j.closed || []);
+  }).catch(() => {
+    document.getElementById('loginMsg').textContent = 'Не удалось связаться со скриптом';
+  });
+}
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function del(id) {
+  if (!confirm('Удалить заявку №' + id + '? Она исчезнет и из таблицы, и с сайта.')) return;
+  post({ action: 'delete', id: id, password: PW }).then(j => {
+    const m = document.getElementById('msg');
+    if (j.ok) { m.textContent = 'Заявка удалена'; loadBookings(); }
+    else { m.textContent = j.error || 'Не удалось удалить'; m.classList.add('err'); }
+    setTimeout(() => { m.textContent = ''; m.classList.remove('err'); }, 5000);
+  });
+}
+function renderClosed(list) {
+  const box = document.getElementById('closedList');
+  box.innerHTML = '';
+  if (!list.length) { box.innerHTML = '<span style="color:#8a5a70">Закрытых дней нет</span>'; return; }
+  list.sort().forEach(d => {
+    const c = document.createElement('span');
+    c.className = 'chip';
+    c.textContent = d;
+    box.appendChild(c);
+  });
+}
+function closeDay(wantClose) {
+  const v = document.getElementById('dayDate').value;
+  if (!v) { document.getElementById('dayMsg').textContent = 'Выберите дату'; return; }
+  post({ action: 'closedays', date: fromInput(v), mode: wantClose ? 'close' : 'open', password: PW }).then(j => {
+    const m = document.getElementById('dayMsg');
+    m.textContent = j.ok ? (wantClose ? 'День закрыт' : 'День открыт') : (j.error || 'Ошибка');
+    if (j.ok) loadBookings();
+    setTimeout(() => { m.textContent = ''; }, 5000);
+  });
+}
+document.getElementById('pw').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+</script>
+</body>
+</html>
